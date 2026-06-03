@@ -1,0 +1,43 @@
+﻿name: warehouse_monitor
+
+services:
+  db:
+    image: postgres:15
+    container_name: warehouse_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+      POSTGRES_DB: warehouse_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: warehouse_api
+    restart: always
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=warehouse_db;Username=postgres;Password=postgres123"
+      Jwt__Key: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsImp0aSI6IjE5OGU0MWFlLTJkZWQtNDA5Yi04NTljLTI4YjU0N2UzM2U4MyIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJhZG1pbiIsImV4cCI6MTc4MDMzMDY4MiwiaXNzIjoiV2FyZWhvdXNlTW9uaXRvckFQSSIsImF1ZCI6IldhcmVob3VzZU1vbml0b3JDbGllbnQifQ.e3CfPFHdcrse-GzCaFVuBrCrKrPPvfOFSwb9paMc-7E"
+      Jwt__Issuer: "WarehouseMonitorAPI"
+      Jwt__Audience: "WarehouseMonitorClient"
+    ports:
+      - "5000:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+
+volumes:
+  postgres_data:

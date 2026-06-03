@@ -1,0 +1,49 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.vs/
+.vs/
+
+## IDE
+.idea/
+.vscode/
+*.sln.iml
+*.swp
+*.swo
+
+## Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+build/
+bld/
+[Bb]in/
+[Oo]bj/
+
+## Database migrations (опционально – оставьте, если не хотите хранить миграции)
+# Migrations/
+
+## Logs
+*.log
+*.logs/
+
+## User-specific files
+*.rsuser
+*.suo
+*.user
+
+## ASP.NET Core
+appsettings.Development.json
+appsettings.Production.json
+
+## Docker
+docker-compose.override.yml
+*.env
+
+## OS generated files
+.DS_Store
+Thumbs.db

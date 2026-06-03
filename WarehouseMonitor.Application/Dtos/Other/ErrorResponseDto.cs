@@ -1,0 +1,8 @@
+﻿namespace WarehouseMonitor.Application.Dtos.Other;
+
+public class ErrorResponseDto
+{
+    public string Message { get; set; } = string.Empty;
+    public int StatusCode { get; set; }
+    public IEnumerable<ValidationErrorDto>? Errors { get; set; }
+}

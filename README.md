@@ -25,7 +25,6 @@ docker-compose up -d --build
 ### 3. Проверить работоспособность
 Веб-интерфейс: http://localhost:5000
 Swagger API: http://localhost:5000/swagger
-Hangfire Dashboard: http://localhost:5000/hangfire
 Авторизация (в веб-интерфейсе)
   Username: любое (например, admin)
   

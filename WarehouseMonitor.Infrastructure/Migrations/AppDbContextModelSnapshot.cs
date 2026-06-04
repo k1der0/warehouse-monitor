@@ -32,7 +32,9 @@ namespace WarehouseMonitor.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("GeneratedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<int>("LowerBound")
                         .HasColumnType("integer");
@@ -48,7 +50,11 @@ namespace WarehouseMonitor.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductId");
+                    b.HasIndex("ForecastDate");
+
+                    b.HasIndex("GeneratedAt");
+
+                    b.HasIndex("ProductId", "ForecastDate");
 
                     b.ToTable("Forecasts");
                 });
@@ -60,22 +66,27 @@ namespace WarehouseMonitor.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("LastUpdated")
-                        .HasColumnType("timestamp with time zone");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uuid");
 
                     b.Property<int>("QuantityOnHand")
-                        .HasColumnType("integer");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
 
                     b.Property<Guid>("WarehouseId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductId");
-
                     b.HasIndex("WarehouseId");
+
+                    b.HasIndex("ProductId", "WarehouseId")
+                        .IsUnique();
 
                     b.ToTable("InventoryLevels");
                 });
@@ -87,30 +98,47 @@ namespace WarehouseMonitor.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<int>("CurrentStock")
-                        .HasColumnType("integer");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
 
                     b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<int>("ReorderPoint")
-                        .HasColumnType("integer");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(5);
 
                     b.Property<int>("SafetyStock")
-                        .HasColumnType("integer");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(2);
 
                     b.Property<string>("Sku")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("IsActive");
+
+                    b.HasIndex("Name");
+
+                    b.HasIndex("Sku")
+                        .IsUnique();
 
                     b.ToTable("Products");
                 });
@@ -128,14 +156,17 @@ namespace WarehouseMonitor.Infrastructure.Migrations
                         .HasColumnType("integer");
 
                     b.Property<decimal?>("Revenue")
-                        .HasColumnType("numeric");
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<DateTime>("SaleDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductId");
+                    b.HasIndex("SaleDate");
+
+                    b.HasIndex("ProductId", "SaleDate");
 
                     b.ToTable("SalesHistories");
                 });
@@ -147,14 +178,18 @@ namespace WarehouseMonitor.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("MovementDate")
-                        .HasColumnType("timestamp with time zone");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<string>("MovementType")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
                     b.Property<string>("Note")
-                        .HasColumnType("text");
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uuid");
@@ -163,12 +198,17 @@ namespace WarehouseMonitor.Infrastructure.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Reference")
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<Guid>("WarehouseId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("MovementDate");
+
+                    b.HasIndex("MovementType");
 
                     b.HasIndex("ProductId");
 
@@ -185,11 +225,13 @@ namespace WarehouseMonitor.Infrastructure.Migrations
 
                     b.Property<string>("Location")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.HasKey("Id");
 
@@ -218,7 +260,7 @@ namespace WarehouseMonitor.Infrastructure.Migrations
                     b.HasOne("WarehouseMonitor.Domain.Entities.Warehouse", "Warehouse")
                         .WithMany("InventoryLevels")
                         .HasForeignKey("WarehouseId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Product");
@@ -234,11 +276,17 @@ namespace WarehouseMonitor.Infrastructure.Migrations
                                 .HasColumnType("uuid");
 
                             b1.Property<decimal>("Amount")
-                                .HasColumnType("numeric");
+                                .HasPrecision(18, 2)
+                                .HasColumnType("numeric(18,2)")
+                                .HasColumnName("UnitPrice_Amount");
 
                             b1.Property<string>("Currency")
                                 .IsRequired()
-                                .HasColumnType("text");
+                                .ValueGeneratedOnAdd()
+                                .HasMaxLength(3)
+                                .HasColumnType("character varying(3)")
+                                .HasDefaultValue("USD")
+                                .HasColumnName("UnitPrice_Currency");
 
                             b1.HasKey("ProductId");
 
@@ -271,9 +319,9 @@ namespace WarehouseMonitor.Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("WarehouseMonitor.Domain.Entities.Warehouse", "Warehouse")
-                        .WithMany()
+                        .WithMany("StockMovements")
                         .HasForeignKey("WarehouseId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Product");
@@ -295,6 +343,8 @@ namespace WarehouseMonitor.Infrastructure.Migrations
             modelBuilder.Entity("WarehouseMonitor.Domain.Entities.Warehouse", b =>
                 {
                     b.Navigation("InventoryLevels");
+
+                    b.Navigation("StockMovements");
                 });
 #pragma warning restore 612, 618
         }

@@ -2,7 +2,6 @@
 
 namespace WarehouseMonitor.Domain.ValueObjects;
 
-[Owned]
 public record Money
 {
     public decimal Amount { get; init; }
@@ -24,6 +23,4 @@ public record Money
             throw new InvalidOperationException($"Cannot add different currencies: {Currency} and {other.Currency}");
         return new Money(Amount + other.Amount, Currency);
     }
-    
-    // Другие операции по необходимости
 }

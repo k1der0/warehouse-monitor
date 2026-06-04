@@ -22,7 +22,8 @@ public class GenericRepository<T> : IRepository<T> where T : class
     public async Task<IReadOnlyList<T>> GetAllAsync(CancellationToken cancellationToken = default)
         => await _dbSet.ToListAsync(cancellationToken);
 
-    public async Task<IReadOnlyList<T>> FindAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<T>> FindAsync(Expression<Func<T, bool>> predicate,
+                                         CancellationToken cancellationToken = default)
         => await _dbSet.Where(predicate).ToListAsync(cancellationToken);
 
     public async Task AddAsync(T entity, CancellationToken cancellationToken = default)

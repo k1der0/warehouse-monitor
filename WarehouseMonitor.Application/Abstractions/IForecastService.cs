@@ -1,6 +1,11 @@
-﻿namespace WarehouseMonitor.Application.Abstractions;
+﻿using WarehouseMonitor.Domain.Entities;
+
+namespace WarehouseMonitor.Application.Abstractions;
 
 public interface IForecastService
 {
-    Task<List<Domain.Entities.Forecast>> GenerateForecastForProductAsync(Guid productId, int forecastDays = 30, CancellationToken cancellationToken = default);
+    Task<List<Domain.Entities.Forecast>> GenerateForecastForProductAsync(
+        Guid productId, 
+        int forecastDays = 30, 
+        CancellationToken cancellationToken = default);
 }

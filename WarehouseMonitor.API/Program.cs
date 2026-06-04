@@ -6,6 +6,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.ML;
 using Microsoft.OpenApi.Models;
 using WarehouseMonitor.Application;
 using WarehouseMonitor.Application.Behaviors;
@@ -128,52 +129,23 @@ internal class Program
         app.UseAuthorization();
         app.UseDefaultFiles();
         app.UseStaticFiles();
+
+        app.UseHangfireDashboard("/hangfire"); // ← ПЕРЕМЕСТИТЕ СЮДА
+
         app.MapControllers();
-        app.UseHangfireDashboard("/hangfire"); // доступ к дашборду Hangfire
 
-        // Временный блок для генерации тестовых данных (только для разработки)
-        using (var scope = app.Services.CreateScope())
+
+
+        // Временная проверка (удалить потом)
+        try
         {
-            var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            var products = dbContext.Products.ToList();
-
-            foreach (var product in products)
-            {
-                // Проверяем, есть ли уже история продаж для этого товара
-                bool hasSales = dbContext.SalesHistories.Any(sh => sh.ProductId == product.Id);
-                if (!hasSales)
-                {
-                    Console.WriteLine($"Generating sales history for product {product.Name}...");
-                    var random = new Random();
-                    var startDate = DateTime.UtcNow.AddDays(-90);
-                    var baseSales = 10; // средние продажи в день
-
-                    for (int i = 0; i < 90; i++)
-                    {
-                        var currentDate = startDate.AddDays(i);
-                        // Добавляем тренд (медленный рост) и сезонность (например, выходные больше)
-                        var trend = i * 0.05; // небольшой рост со временем
-                        var dayOfWeek = (int)currentDate.DayOfWeek;
-                        var weekendFactor = dayOfWeek == 0 || dayOfWeek == 6 ? 1.3 : 1.0;
-                        var quantity = (int)((baseSales + trend) * weekendFactor * (0.7 + random.NextDouble() * 0.6));
-                        quantity = Math.Max(1, quantity);
-
-                        var salesHistory = new SalesHistory
-                        {
-                            Id = Guid.NewGuid(),
-                            ProductId = product.Id,
-                            SaleDate = currentDate,
-                            QuantitySold = quantity,
-                            Revenue = quantity * (product.UnitPrice?.Amount ?? 100m)
-                        };
-                        dbContext.SalesHistories.Add(salesHistory);
-                    }
-                    await dbContext.SaveChangesAsync();
-                    Console.WriteLine($"Generated 90 days of sales for product {product.Name}.");
-                }
-            }
-        } 
-
+            var mlContext = new MLContext();
+            Console.WriteLine("ML.NET initialized successfully");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"ML.NET initialization failed: {ex.Message}");
+        }
         app.Run();
     }
 }
